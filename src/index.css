@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* This app has no light-mode styles — force native form controls
+   (select dropdowns, scrollbars, checkboxes) to render dark instead of
+   following the OS/browser light-mode preference. */
+:root {
+  color-scheme: dark;
+}
