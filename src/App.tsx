@@ -31,13 +31,28 @@ const NAV: { id: Section; label: string }[] = [
   { id: 'config', label: 'Config' },
 ]
 
+const HEALTH_POLL_MS = 5000
+
 function useServerHealth() {
   const [healthy, setHealthy] = useState<boolean | null>(null)
   useEffect(() => {
-    healthApi
-      .check()
-      .then(() => setHealthy(true))
-      .catch(() => setHealthy(false))
+    let cancelled = false
+    const poll = () => {
+      healthApi
+        .check()
+        .then(() => {
+          if (!cancelled) setHealthy(true)
+        })
+        .catch(() => {
+          if (!cancelled) setHealthy(false)
+        })
+    }
+    poll()
+    const id = setInterval(poll, HEALTH_POLL_MS)
+    return () => {
+      cancelled = true
+      clearInterval(id)
+    }
   }, [])
   return healthy
 }
