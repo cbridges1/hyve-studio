@@ -312,6 +312,7 @@ export type RepoConfig = {
     frontendUrl?: string
     auth?: { mode?: string; forward?: { validateUrl?: string; timeout?: string } }
   }
+  env?: { file?: string }
 }
 export type PatchConfigRequest = {
   reconcile?: { mode?: string; strictDelete?: boolean; strictResourceDelete?: boolean }
@@ -320,6 +321,7 @@ export type PatchConfigRequest = {
     frontendUrl?: string
     auth?: { mode?: string; forward?: { validateUrl?: string; timeout?: string } }
   }
+  env?: { file?: string }
 }
 
 export const configApi = {

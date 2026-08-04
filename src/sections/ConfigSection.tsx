@@ -8,6 +8,7 @@ export function ConfigSection() {
   const [mode, setMode] = useState('local')
   const [strictDelete, setStrictDelete] = useState(false)
   const [strictResourceDelete, setStrictResourceDelete] = useState(false)
+  const [envFile, setEnvFile] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -20,6 +21,7 @@ export function ConfigSection() {
         setMode(c.reconcile.mode)
         setStrictDelete(c.reconcile.strictDelete)
         setStrictResourceDelete(c.reconcile.strictResourceDelete)
+        setEnvFile(c.env?.file ?? '')
       })
       .catch((e: Error) => setError(e.message))
   }, [])
@@ -30,7 +32,7 @@ export function ConfigSection() {
     setSaved(false)
     setError(null)
     configApi
-      .patch({ reconcile: { mode, strictDelete, strictResourceDelete } })
+      .patch({ reconcile: { mode, strictDelete, strictResourceDelete }, env: { file: envFile } })
       .then((c) => {
         setConfig(c)
         setSaved(true)
@@ -74,6 +76,22 @@ export function ConfigSection() {
           <CheckboxField label="Strict delete" checked={strictDelete} onChange={setStrictDelete} />
           <CheckboxField label="Strict resource delete" checked={strictResourceDelete} onChange={setStrictResourceDelete} />
         </div>
+      </div>
+
+      <div className={`${panel} p-4 mb-6 max-w-lg`}>
+        <p className="text-sm font-medium text-ink mb-3">Local env file</p>
+        <label className="block">
+          <span className={labelClass}>
+            Path relative to the repo root, loaded before reconciles/workflows. Automatically added to
+            .gitignore.
+          </span>
+          <input
+            className="w-full bg-base-bg border border-base-border rounded-md px-2.5 py-1.5 text-sm text-ink focus:outline-none focus:border-accent"
+            placeholder="local.env"
+            value={envFile}
+            onChange={(e) => setEnvFile(e.target.value)}
+          />
+        </label>
       </div>
 
       {error && <p className="text-red-400 text-sm mb-3">{error}</p>}
