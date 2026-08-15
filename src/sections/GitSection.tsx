@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { type GitStatus, type SyncReport, gitApi } from '../lib/api'
 import { Badge } from '../components/Badge'
 import { TextField } from '../components/Field'
 import { buttonPrimary, buttonSecondary, heading, panel, subtext } from '../components/theme'
+
+const STATUS_POLL_MS = 5000
 
 export function GitSection() {
   const [status, setStatus] = useState<GitStatus | null>(null)
@@ -11,6 +13,28 @@ export function GitSection() {
   const [report, setReport] = useState<SyncReport | null>(null)
   const [syncBusy, setSyncBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Poll in the background so the Connected/Unreachable badge stays live
+  // without the user having to click "Check status" or refresh the page.
+  useEffect(() => {
+    let cancelled = false
+    const poll = () => {
+      gitApi
+        .status()
+        .then((s) => {
+          if (!cancelled) setStatus(s)
+        })
+        .catch((e: Error) => {
+          if (!cancelled) setError(e.message)
+        })
+    }
+    poll()
+    const id = setInterval(poll, STATUS_POLL_MS)
+    return () => {
+      cancelled = true
+      clearInterval(id)
+    }
+  }, [])
 
   const checkStatus = () => {
     setStatusBusy(true)

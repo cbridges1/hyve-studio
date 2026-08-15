@@ -312,6 +312,7 @@ export type RepoConfig = {
     frontendUrl?: string
     auth?: { mode?: string; forward?: { validateUrl?: string; timeout?: string } }
   }
+  env?: { file?: string }
 }
 export type PatchConfigRequest = {
   reconcile?: { mode?: string; strictDelete?: boolean; strictResourceDelete?: boolean }
@@ -320,12 +321,25 @@ export type PatchConfigRequest = {
     frontendUrl?: string
     auth?: { mode?: string; forward?: { validateUrl?: string; timeout?: string } }
   }
+  env?: { file?: string }
 }
 
 export const configApi = {
   get: () => apiFetch<RepoConfig>('/config'),
   patch: (body: PatchConfigRequest) =>
     apiFetch<RepoConfig>('/config', { method: 'PATCH', body: JSON.stringify(body) }),
+}
+
+// ── Env (contents of the file named by config.env.file, not hyve.yaml itself) ──
+
+export const envApi = {
+  list: () => apiFetch<Record<string, string>>('/env'),
+  set: (key: string, value: string) =>
+    apiFetch<Record<string, string>>(`/env/${encodeURIComponent(key)}`, {
+      method: 'PUT',
+      body: JSON.stringify({ value }),
+    }),
+  unset: (key: string) => apiFetch<void>(`/env/${encodeURIComponent(key)}`, { method: 'DELETE' }),
 }
 
 // ── Reconcile ────────────────────────────────────────────────────────────
